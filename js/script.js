@@ -15,10 +15,19 @@ const isText = (text) => {
   return text && text.trim().length > 0 && !isNoStrongNumber(text);
 };
 
-const render = (toDoData) => {
+const saveData = (data) => {
+  localStorage.dataToDo = JSON.stringify(data);
+};
+
+const loadData = () => {
+  return JSON.parse(localStorage.dataToDo);
+};
+
+const render = () => {
   todoList.innerHTML = "";
   todoCompleted.innerHTML = "";
-  localStorage.dataToDo = JSON.stringify(toDoData);
+
+  toDoData = loadData();
 
   toDoData.forEach((item, index) => {
     const li = document.createElement("li");
@@ -29,23 +38,24 @@ const render = (toDoData) => {
         <button class="todo-remove"></button>
         <button class="todo-complete"></button>
       </div>`;
+
+    li.querySelector(".todo-complete").addEventListener("click", () => {
+      item.completed = !item.completed;
+      saveData(toDoData);
+      render();
+    });
+
+    li.querySelector(".todo-remove").addEventListener("click", () => {
+      toDoData.splice(index, 1);
+      saveData(toDoData);
+      render();
+    });
+
     if (item.completed) {
       todoCompleted.append(li);
     } else {
       todoList.append(li);
     }
-
-    li.querySelector(".todo-complete").addEventListener("click", (e) => {
-      e.preventDefault();
-      item.completed = !item.completed;
-      render(toDoData);
-    });
-
-    li.querySelector(".todo-remove").addEventListener("click", (e) => {
-      e.preventDefault();
-      toDoData.splice(index, 1);
-      render(toDoData);
-    });
   });
 };
 
@@ -59,16 +69,12 @@ todoControl.addEventListener("submit", (e) => {
 
     toDoData.push(newToDo);
     headerInput.value = "";
-    render(toDoData);
+    saveData(toDoData);
+    render();
   }
 });
 
 if (!!localStorage.dataToDo && localStorage.dataToDo.length > 0) {
-  toDoData = JSON.parse(localStorage.dataToDo);
-  render(toDoData);
+  toDoData = loadData();
+  render();
 }
-// console.log(todoControl);
-// console.log(headerInput);
-// console.log(headerButton);
-// console.log(todoList);
-// console.log(todoCompleted);
